@@ -1,0 +1,139 @@
+<!DOCTYPE HTML>
+<html>
+   <head>
+	   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+      <script type="text/javascript" src="canvasjs.min.js"></script>
+      <script type="text/javascript" src="victor.min.js"></script>
+      <script type="text/javascript">
+         var dpsSize = []; // dataPoints
+         var dpsAngle = []; // dataPoints
+         var dpsLength = []; // dataPoints
+         var chart;
+
+         $( document ).ready(function() {
+            chart = new CanvasJS.Chart("chartContainer",{
+               title :{
+                  text: "Live Random Data"
+               },       
+               data: [{
+                  type: "line",
+                  dataPoints: dpsSize 
+               },
+               {
+                  type: "line",
+                  dataPoints: dpsLength 
+               },
+               {
+                  type: "line",
+                  dataPoints: dpsAngle
+               }
+               ]
+            });
+         });
+         
+
+         var xVal = 0;
+         var dataLength = 500; // number of dataPoints visible at any point
+
+         function updateChart(count, size, angle, length) {               
+            dpsSize.push({
+               x: xVal,
+               y: size
+            });
+
+            dpsAngle.push({
+               x: xVal,
+               y: angle
+            });
+
+            dpsLength.push({
+               x: xVal,
+               y: length
+            });
+
+            xVal++;
+
+            if (dpsSize.length > dataLength)
+            {
+               dpsSize.shift();
+               dpsAngle.shift();
+               dpsLength.shift();            
+            }               
+            chart.render();      
+         };
+
+         function CalcGazeVector(d) {
+             gazeVecRaw = Victor(d["xoffs"]["py/tuple"][0]*-1, d["yoffs"]["py/tuple"][0]*-1)
+                                 .subtract(new Victor(d["center"]["py/tuple"][0], d["center"]["py/tuple"][1]));
+             //console.log(gazeVecRaw.toString());
+
+             updateChart(dataLength, d["size"]["py/tuple"][1],gazeVecRaw.horizontalAngleDeg() ,gazeVecRaw.length());
+         }
+
+         function WebSocketTest()
+         {
+            if ("WebSocket" in window)
+            {
+               //alert("WebSocket is supported by your Browser!");
+               
+               // Let us open a web socket
+               var ws = new WebSocket("ws://134.60.70.23:8080/websocket");
+				
+               ws.onopen = function()
+               {
+                  // Web Socket is connected, send data using send()
+                  //ws.send("Message to send");
+                  //alert("Message is sent...");
+               };
+				
+               ws.onmessage = function (evt) 
+               { 
+                  var received_msg = evt.data;
+                  //alert("Message is received...: "+received_msg);
+                  $("#values").text(evt.data);
+                  var values = $.parseJSON(evt.data);
+
+                  if(values["center"] !== undefined) {
+                     //console.log(values);
+                     $("#pupilc").css({'top': values["center"]["py/tuple"][1], 'left': values["center"]["py/tuple"][0]}); 
+                     $("#glint").css({'top': values["yoffs"]["py/tuple"][0]*-1, 'left': values["xoffs"]["py/tuple"][0]*-1}); 
+
+                     CalcGazeVector(values);        
+                  } else {
+                     updateChart(dataLength, 0,0 ,0);
+                  }                            
+               };
+				
+               ws.onclose = function()
+               { 
+                  // websocket is closed.
+                  alert("Connection is closed..."); 
+               };
+            }
+            
+            else
+            {
+               // The browser doesn't support WebSocket
+               alert("WebSocket NOT supported by your Browser!");
+            }
+         }
+      </script>
+		
+   </head>
+   <body>
+   
+      <div id="sse">
+         <a href="javascript:WebSocketTest()">Run WebSocket</a>
+      </div>
+      <div id="values">
+
+      </div>
+      <div id="vis">
+         <div id="glint" style="position:absolute; background-color:#ff0000;">G</div>
+         <div id="pupil" style="position:absolute; background-color:#00ff00;">P</div>
+         <div id="pupilc" style="position:absolute; background-color:#0000ff;">PC</div>
+      </div>
+      <div id="chartContainer" style="height: 300px; width:100%;">
+      </div>
+   </body>
+</html>
