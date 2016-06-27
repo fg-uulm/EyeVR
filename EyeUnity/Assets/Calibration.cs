@@ -105,6 +105,10 @@ public class Calibration {
 
 		Debug.Log (coefficientsX);
 		Debug.Log (coefficientsY);
+
+		System.IO.File.WriteAllText("calibDatacoffX.txt", coefficientsX.ToString());
+
+		System.IO.File.WriteAllText("calibDatacoffY.txt", coefficientsY.ToString());
 		//		
 //		MathNet.Numerics.LinearAlgebra.Factorization.Svd<float> svd = measurementsX.Svd();
 //		coefficientsX = svd.Solve (calibrationPointX);

@@ -79,6 +79,8 @@ public class OVRCameraRig : MonoBehaviour
 	private readonly string handAnchorName = "HandAnchor";
 	private readonly string legacyEyeAnchorName = "Camera";
 
+	public bool disableTracking = false;
+
 #if UNITY_ANDROID && !UNITY_EDITOR
     bool correctedTrackingSpace = false;
 #endif
@@ -133,6 +135,8 @@ public class OVRCameraRig : MonoBehaviour
 		bool monoscopic = OVRManager.instance.monoscopic;
 
 		OVRPose tracker = OVRManager.tracker.GetPose(0d);
+
+		if(disableTracking) return;
 
 		trackerAnchor.localRotation = tracker.orientation;
 		centerEyeAnchor.localRotation = VR.InputTracking.GetLocalRotation(VR.VRNode.CenterEye);

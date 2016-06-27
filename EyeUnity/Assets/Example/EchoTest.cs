@@ -5,13 +5,21 @@ using Newtonsoft.Json;
 
 public class EchoTest : MonoBehaviour {
 	WebSocket w;
+	OneEuroFilter fx;
+	OneEuroFilter fy;
+	OneEuroFilter fs;
 
 	// Use this for initialization
 	IEnumerator Start () {
 		WebSocket w = new WebSocket(new Uri("ws://134.60.70.23:8080/websocket"));
+		//WebSocket w = new WebSocket(new Uri("ws://192.168.178.64:8080/websocket"));
 		yield return StartCoroutine(w.Connect());
 		//w.SendString("Hi there");
 		int i=0;
+
+		fx = new OneEuroFilter (2.0, 0.2);
+		fy = new OneEuroFilter (2.0, 0.2);
+		fs = new OneEuroFilter (15.0, 0.2);
 
 		Transform pS = transform.Find ("pupilSphere");
 
@@ -29,7 +37,7 @@ public class EchoTest : MonoBehaviour {
 				} else {
 					//Debug.Log(ret);
 					//Debug.Log(ret.Glint.AsVector);
-					float size = ret.Size.AsVector.y/40;
+					float size = (float)fs.Filter(ret.Size.AsVector.y/60, 30.0);
 					//Debug.Log (size);
 					pS.GetComponent<Renderer>().material.color = Color.black;
 					pS.localScale = new Vector3(size, size, size);
@@ -39,11 +47,13 @@ public class EchoTest : MonoBehaviour {
 					if (CurrentCalibration != null) {
 						Vector2 gazePos = CurrentCalibration.CalcCoordinates(lastVector);
 						pS.localPosition = new Vector3 (gazePos.x, gazePos.y, 1.32f);
-						Debug.Log (gazePos);
+						//Debug.Log (gazePos);
 					} else if(xRatio != 0) {
 						Vector3 newPos = new Vector3(0.0f, 0.0f, 1.32f);
-						newPos.x = (lastVector.x + xOffset) * xRatio;
-						newPos.y = (lastVector.y + yOffset) * yRatio;
+						//newPos.x = (lastVector.x / xRatio) + xOffset;
+						//newPos.y = (lastVector.y / yRatio) + yOffset;
+						newPos.x = (float)fx.Filter((lastVector.x - cx) / xRatio, 30.0);
+						newPos.y = (float)fy.Filter((lastVector.y - cy) / yRatio, 30.0);
 						pS.localPosition = newPos;
 						//Debug.Log ("New pos: " + newPos);
 					} else {
@@ -72,4 +82,6 @@ public class EchoTest : MonoBehaviour {
 	public float yRatio;
 	public float xOffset;
 	public float yOffset;
+	public float cx;
+	public float cy;
 }
