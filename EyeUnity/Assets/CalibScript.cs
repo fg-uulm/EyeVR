@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using Newtonsoft.Json;
 
 public class CalibScript : MonoBehaviour {
@@ -83,16 +84,16 @@ public class CalibScript : MonoBehaviour {
 			Debug.Log ("BL Avg Y: "+BLAvgY);
 
 			//Calculate
-			NaiveLinearCalibration();
-			//Calibration newCalib = NonLinearMRCalibration ();
+			//NaiveLinearCalibration();
+			Calibration newCalib = NonLinearMRCalibration ();
 
 			//Update calib in tracker
-			//tracker.CurrentCalibration = newCalib;
+			tracker.CurrentCalibration = newCalib;
 
 			cS.localPosition = new Vector3 (20.0f, 0.0f, 1.32f);
 			IsCalibrating = false;
 
-		} else {
+		} else{
 			//Step through positions
 			if (IsCalibrating && calibDataCenter.Count < SamplesPerPoint) {
 				//Set sphere position

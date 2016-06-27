@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
 using MathNet.Numerics.LinearAlgebra;
 //using MathNet.Numerics.LinearAlgebra.Single.Solvers;
 
@@ -73,27 +72,24 @@ public class Calibration {
 
 
 		// Iterate over all calibration data
-		int i = 0;
 		for (int it = 0; it < matSize; it++) {
 
-			float x = calibrationData[it].medianVector.x;
-			float y = calibrationData[it].medianVector.y;
+			double x = (calibrationData[it].medianVector.x);
+			double y = calibrationData[it].medianVector.y;
 
 			// Formaula from "Eye Gaze Tracking under natural head movements"
-			measurementsX[i, 0] = 1;
-			measurementsX[i, 1] = x;
-			measurementsX[i, 2] = y;
-			measurementsX[i, 3] = x * y;
+			measurementsX[it, 0] = 1;
+			measurementsX[it, 1] = x;
+			measurementsX[it, 2] = y;
+			measurementsX[it, 3] = x * y;
 
-			measurementsY[i, 0] = 1;
-			measurementsY[i, 1] = x;
-			measurementsY[i, 2] = y;
-			measurementsY[i, 3] = y * y;
+			measurementsY[it, 0] = 1;
+			measurementsY[it, 1] = x;
+			measurementsY[it, 2] = y;
+			measurementsY[it, 3] = y * y;
 
-			calibrationPointX[i,0] = calibrationData[it].point.x;
-			calibrationPointY[i,0] = calibrationData[it].point.y;
-
-			i++;
+			calibrationPointX[it,0] = calibrationData[it].point.x;
+			calibrationPointY[it,0] = calibrationData[it].point.y;
 		}
 	//	SingularValueDecomposition svd = measurementsX.SingularValueDecomposition;
 		//coefficientsX = measurementsX.QRDecomposition.Solve(calibrationPointX);
@@ -144,13 +140,17 @@ public class Calibration {
 		float a2 = (float)coefficientsX[2, 0];
 		float a3 = (float)coefficientsX[3, 0];
 
+
 		float b0 = (float)coefficientsY[0, 0];
 		float b1 = (float)coefficientsY[1, 0];
 		float b2 = (float)coefficientsY[2, 0];
 		float b3 = (float)coefficientsY[3, 0];
 
+		Debug.Log("A: " +a0+", "+a1 + ", " +a2+", "+a3);
+		Debug.Log("B: " +b0+", "+b1 + ", " +b2+", "+b3);
+
 		float x = (a0 + a1 * vector.x + a2 * vector.y + a3 * vector.x * vector.y);
-		float y = (b0 + b1 * vector.x + b2 * vector.y + b3 * vector.y * vector.y);
+		float y = (b0 + b1 * vector.x + b2 * vector.y + b3 * vector.x * vector.y);
 		 
 		return new Vector2(x,y);
 	}
