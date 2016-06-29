@@ -2,14 +2,14 @@
 
 Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 
-Licensed under the Oculus VR Rift SDK License Version 3.2 (the "License");
+Licensed under the Oculus VR Rift SDK License Version 3.3 (the "License");
 you may not use the Oculus VR Rift SDK except in compliance with the License,
 which is provided at the time of installation or download, or which
 otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
 
-http://www.oculusvr.com/licenses/LICENSE-3.2
+http://www.oculus.com/licenses/LICENSE-3.3
 
 Unless required by applicable law or agreed to in writing, the Oculus VR SDK
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -107,7 +107,7 @@ public class OVRDisplay
 	}
 
 	/// <summary>
-	/// Gets the current acceleration of the head.
+	/// Gets the current linear acceleration of the head.
 	/// </summary>
 	public Vector3 acceleration
 	{
@@ -116,21 +116,51 @@ public class OVRDisplay
 				return Vector3.zero;
 
             OVRPose ret = OVRPlugin.GetEyeAcceleration(OVRPlugin.Eye.None).ToOVRPose();
-            return -ret.position;
+            return ret.position;
 		}
 	}
+
+    /// <summary>
+    /// Gets the current angular acceleration of the head.
+    /// </summary>
+    public Quaternion angularAcceleration
+    {
+        get
+        {
+            if (!OVRManager.isHmdPresent)
+                return Quaternion.identity;
+
+            OVRPose ret = OVRPlugin.GetEyeAcceleration(OVRPlugin.Eye.None).ToOVRPose();
+            return ret.orientation;
+        }
+    }
+
+    /// <summary>
+    /// Gets the current linear velocity of the head.
+    /// </summary>
+    public Vector3 velocity
+    {
+        get
+        {
+            if (!OVRManager.isHmdPresent)
+                return Vector3.zero;
+
+            OVRPose ret = OVRPlugin.GetEyeVelocity(OVRPlugin.Eye.None).ToOVRPose();
+            return ret.position;
+        }
+    }
 	
 	/// <summary>
 	/// Gets the current angular velocity of the head.
 	/// </summary>
-	public Vector3 angularVelocity
+	public Quaternion angularVelocity
 	{
 		get {
 			if (!OVRManager.isHmdPresent)
-				return Vector3.zero;
+				return Quaternion.identity;
 
 			OVRPose ret = OVRPlugin.GetEyeVelocity(OVRPlugin.Eye.None).ToOVRPose();
-			return ret.orientation.eulerAngles;
+			return ret.orientation;
 		}
 	}
 

@@ -2,14 +2,14 @@
 
 Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 
-Licensed under the Oculus VR Rift SDK License Version 3.2 (the "License");
+Licensed under the Oculus VR Rift SDK License Version 3.3 (the "License");
 you may not use the Oculus VR Rift SDK except in compliance with the License,
 which is provided at the time of installation or download, or which
 otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
 
-http://www.oculusvr.com/licenses/LICENSE-3.2
+http://www.oculus.com/licenses/LICENSE-3.3
 
 Unless required by applicable law or agreed to in writing, the Oculus VR SDK
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,7 +65,7 @@ public class OVRCameraRig : MonoBehaviour
 	/// </summary>
 	public Transform rightHandAnchor { get; private set; }
 	/// <summary>
-	/// Always coincides with the pose of the tracker.
+	/// Always coincides with the pose of the sensor.
 	/// </summary>
 	public Transform trackerAnchor { get; private set; }
 	/// <summary>
@@ -78,8 +78,6 @@ public class OVRCameraRig : MonoBehaviour
 	private readonly string eyeAnchorName = "EyeAnchor";
 	private readonly string handAnchorName = "HandAnchor";
 	private readonly string legacyEyeAnchorName = "Camera";
-
-	public bool disableTracking = false;
 
 #if UNITY_ANDROID && !UNITY_EDITOR
     bool correctedTrackingSpace = false;
@@ -134,23 +132,21 @@ public class OVRCameraRig : MonoBehaviour
 	{
 		bool monoscopic = OVRManager.instance.monoscopic;
 
-		OVRPose tracker = OVRManager.tracker.GetPose(0d);
-
-		if(disableTracking) return;
+		OVRPose tracker = OVRManager.tracker.GetPose();
 
 		trackerAnchor.localRotation = tracker.orientation;
 		centerEyeAnchor.localRotation = VR.InputTracking.GetLocalRotation(VR.VRNode.CenterEye);
         leftEyeAnchor.localRotation = monoscopic ? centerEyeAnchor.localRotation : VR.InputTracking.GetLocalRotation(VR.VRNode.LeftEye);
 		rightEyeAnchor.localRotation = monoscopic ? centerEyeAnchor.localRotation : VR.InputTracking.GetLocalRotation(VR.VRNode.RightEye);
-		leftHandAnchor.localRotation = OVRInput.GetLocalHandRotation(OVRInput.Hand.Left);
-		rightHandAnchor.localRotation = OVRInput.GetLocalHandRotation(OVRInput.Hand.Right);
+		leftHandAnchor.localRotation = OVRInput.GetLocalControllerRotation(OVRInput.Controller.LTouch);
+        rightHandAnchor.localRotation = OVRInput.GetLocalControllerRotation(OVRInput.Controller.RTouch);
 
 		trackerAnchor.localPosition = tracker.position;
 		centerEyeAnchor.localPosition = VR.InputTracking.GetLocalPosition(VR.VRNode.CenterEye);
 		leftEyeAnchor.localPosition = monoscopic ? centerEyeAnchor.localPosition : VR.InputTracking.GetLocalPosition(VR.VRNode.LeftEye);
 		rightEyeAnchor.localPosition = monoscopic ? centerEyeAnchor.localPosition : VR.InputTracking.GetLocalPosition(VR.VRNode.RightEye);
-		leftHandAnchor.localPosition = OVRInput.GetLocalHandPosition(OVRInput.Hand.Left);
-		rightHandAnchor.localPosition = OVRInput.GetLocalHandPosition(OVRInput.Hand.Right);
+        leftHandAnchor.localPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
+        rightHandAnchor.localPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
 
 		if (UpdatedAnchors != null)
 		{
@@ -173,10 +169,10 @@ public class OVRCameraRig : MonoBehaviour
             rightEyeAnchor = ConfigureEyeAnchor(trackingSpace, VR.VRNode.RightEye);
 
 		if (leftHandAnchor == null)
-            leftHandAnchor = ConfigureHandAnchor(trackingSpace, OVRPlugin.Node.LeftHand);
+            leftHandAnchor = ConfigureHandAnchor(trackingSpace, OVRPlugin.Node.HandLeft);
 
 		if (rightHandAnchor == null)
-            rightHandAnchor = ConfigureHandAnchor(trackingSpace, OVRPlugin.Node.RightHand);
+            rightHandAnchor = ConfigureHandAnchor(trackingSpace, OVRPlugin.Node.HandRight);
 
 		if (trackerAnchor == null)
 			trackerAnchor = ConfigureTrackerAnchor(trackingSpace);
@@ -265,7 +261,7 @@ public class OVRCameraRig : MonoBehaviour
 
 	private Transform ConfigureHandAnchor(Transform root, OVRPlugin.Node hand)
 	{
-		string handName = (hand == OVRPlugin.Node.LeftHand) ? "Left" : "Right";
+		string handName = (hand == OVRPlugin.Node.HandLeft) ? "Left" : "Right";
 		string name = handName + handAnchorName;
 		Transform anchor = transform.Find(root.name + "/" + name);
 

@@ -2,14 +2,14 @@
 
 Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 
-Licensed under the Oculus VR Rift SDK License Version 3.2 (the "License");
+Licensed under the Oculus VR Rift SDK License Version 3.3 (the "License");
 you may not use the Oculus VR Rift SDK except in compliance with the License,
 which is provided at the time of installation or download, or which
 otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
 
-http://www.oculusvr.com/licenses/LICENSE-3.2
+http://www.oculus.com/licenses/LICENSE-3.3
 
 Unless required by applicable law or agreed to in writing, the Oculus VR SDK
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -159,8 +159,14 @@ public class OVRPlayerController : MonoBehaviour
 			}
 
 			var p = CameraRig.transform.localPosition;
-			p.y = OVRManager.profile.eyeHeight - 0.5f * Controller.height
-				+ Controller.center.y;
+			if (OVRManager.instance.trackingOriginType == OVRManager.TrackingOrigin.EyeLevel)
+			{
+				p.y = OVRManager.profile.eyeHeight - (0.5f * Controller.height) + Controller.center.y;
+			}
+			else if (OVRManager.instance.trackingOriginType == OVRManager.TrackingOrigin.FloorLevel)
+			{
+				p.y = - (0.5f * Controller.height) + Controller.center.y;
+			}
 			CameraRig.transform.localPosition = p;
 		}
 		else if (InitialPose != null)
@@ -299,7 +305,7 @@ public class OVRPlayerController : MonoBehaviour
 			euler.y += Input.GetAxis("Mouse X") * rotateInfluence * 3.25f;
 #endif
 
-		moveInfluence = SimulationRate * Time.deltaTime * Acceleration * 0.1f * MoveScale * MoveScaleMultiplier;
+		moveInfluence = Acceleration * 0.1f * MoveScale * MoveScaleMultiplier;
 
 #if !UNITY_ANDROID // LeftTrigger not avail on Android game pad
 		moveInfluence *= 1.0f + OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);

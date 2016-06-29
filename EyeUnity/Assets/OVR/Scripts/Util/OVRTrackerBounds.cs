@@ -1,15 +1,15 @@
-﻿/************************************************************************************
+/************************************************************************************
 
 Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 
-Licensed under the Oculus VR Rift SDK License Version 3.2 (the "License");
+Licensed under the Oculus VR Rift SDK License Version 3.3 (the "License");
 you may not use the Oculus VR Rift SDK except in compliance with the License,
 which is provided at the time of installation or download, or which
 otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
 
-http://www.oculusvr.com/licenses/LICENSE-3.2
+http://www.oculus.com/licenses/LICENSE-3.3
 
 Unless required by applicable law or agreed to in writing, the Oculus VR SDK
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -80,11 +80,11 @@ public class OVRTrackerBounds : MonoBehaviour
     }
 
 	/// <summary>
-	/// Computes frustum planes from tracker frustum parameters.
+	/// Computes frustum planes from the sensor's frustum parameters.
 	/// </summary>
 	void ComputePlanes()
     {
-        OVRTracker.Frustum frustum = OVRManager.tracker.frustum;
+        OVRTracker.Frustum frustum = OVRManager.tracker.GetFrustum();
         float nearZ = frustum.nearZ;
         float farZ = frustum.farZ;
         float hFOV = Mathf.Deg2Rad * frustum.fov.x * 0.5f;
@@ -148,7 +148,7 @@ public class OVRTrackerBounds : MonoBehaviour
         // TODO - probably don't have to do this every frame!
         ComputePlanes();
 
-        OVRPose trackerPose = OVRManager.tracker.GetPose(0f);
+        OVRPose trackerPose = OVRManager.tracker.GetPose();
         Matrix4x4 trackerMat = Matrix4x4.TRS(trackerPose.position, trackerPose.orientation, Vector3.one);
 
         // Transform point into volume space

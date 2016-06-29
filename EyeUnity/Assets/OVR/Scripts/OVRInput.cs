@@ -1,15 +1,15 @@
-﻿/************************************************************************************
+/************************************************************************************
 
 Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 
-Licensed under the Oculus VR Rift SDK License Version 3.2 (the "License");
+Licensed under the Oculus VR Rift SDK License Version 3.3 (the "License");
 you may not use the Oculus VR Rift SDK except in compliance with the License,
 which is provided at the time of installation or download, or which
 otherwise accompanies this software in either electronic or hard copy form.
 
 You may obtain a copy of the License at
 
-http://www.oculusvr.com/licenses/LICENSE-3.2
+http://www.oculus.com/licenses/LICENSE-3.3
 
 Unless required by applicable law or agreed to in writing, the Oculus VR SDK
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,15 +32,8 @@ using UnityEngine;
 /// <summary>
 /// Provides a unified input system for Oculus controllers and gamepads.
 /// </summary>
-public class OVRInput
+public static class OVRInput
 {
-	/// Identifies a Hand for querying the Position and Rotation of a given Hand Node.
-	public enum Hand
-	{
-		Left = OVRPlugin.Node.LeftHand, ///< Identifies the Left Hand
-		Right = OVRPlugin.Node.RightHand, ///< Identifies the Right Hand
-	}
-
 	[Flags]
 	/// Virtual button mappings that allow the same input bindings to work across different controllers.
 	public enum Button
@@ -72,10 +65,10 @@ public class OVRInput
 		DpadDown                  = 0x00000020, ///< Maps to RawButton: [Gamepad: DpadDown], [Touch, LTouch, RTouch: None]
 		DpadLeft                  = 0x00000040, ///< Maps to RawButton: [Gamepad: DpadLeft], [Touch, LTouch, RTouch: None]
 		DpadRight                 = 0x00000080, ///< Maps to RawButton: [Gamepad: DpadRight], [Touch, LTouch, RTouch: None]
-		Up                        = 0x10000000, ///< Maps to RawButton: [Gamepad: DpadUp], [Touch, LTouch: LThumbstickUp], [RTouch: RThumbstickUp]
-		Down                      = 0x20000000, ///< Maps to RawButton: [Gamepad: DpadDown], [Touch, LTouch: LThumbstickDown], [RTouch: RThumbstickDown]
-		Left                      = 0x40000000, ///< Maps to RawButton: [Gamepad: DpadLeft], [Touch, LTouch: LThumbstickLeft], [RTouch: RThumbstickLeft]
-		Right     = unchecked((int)0x80000000), ///< Maps to RawButton: [Gamepad: DpadRight], [Touch, LTouch: LThumbstickRight], [RTouch: RThumbstickRight]
+		Up                        = 0x10000000, ///< Maps to RawButton: [Gamepad, Touch, LTouch: LThumbstickUp], [RTouch: RThumbstickUp]
+		Down                      = 0x20000000, ///< Maps to RawButton: [Gamepad, Touch, LTouch: LThumbstickDown], [RTouch: RThumbstickDown]
+		Left                      = 0x40000000, ///< Maps to RawButton: [Gamepad, Touch, LTouch: LThumbstickLeft], [RTouch: RThumbstickLeft]
+		Right     = unchecked((int)0x80000000), ///< Maps to RawButton: [Gamepad, Touch, LTouch: LThumbstickRight], [RTouch: RThumbstickRight]
 		Any                       = ~None,      ///< Maps to RawButton: [Gamepad, Touch, LTouch, RTouch: Any]
 	}
 
@@ -91,8 +84,8 @@ public class OVRInput
 		Start                     = 0x00100000, ///< Maps to Physical Button: [Gamepad: Start], [Touch, LTouch, RTouch: None]
 		Back                      = 0x00200000, ///< Maps to Physical Button: [Gamepad: Back], [Touch, LTouch, RTouch: None]
 		LShoulder                 = 0x00000800, ///< Maps to Physical Button: [Gamepad: LShoulder], [Touch, LTouch, RTouch: None]
-		LIndexTrigger             = 0x01000000, ///< Maps to Physical Button: [Gamepad, Touch, LTouch: LIndexTrigger], [RTouch: None]
-		LHandTrigger              = 0x02000000, ///< Maps to Physical Button: [Gamepad: None], [Touch, LTouch: LHandTrigger], [RTouch: None]
+		LIndexTrigger             = 0x10000000, ///< Maps to Physical Button: [Gamepad, Touch, LTouch: LIndexTrigger], [RTouch: None]
+		LHandTrigger              = 0x20000000, ///< Maps to Physical Button: [Gamepad: None], [Touch, LTouch: LHandTrigger], [RTouch: None]
 		LThumbstick               = 0x00000400, ///< Maps to Physical Button: [Gamepad, Touch, LTouch: LThumbstick], [RTouch: None]
 		LThumbstickUp             = 0x00000010, ///< Maps to Physical Button: [Gamepad, Touch, LTouch: LThumbstickUp], [RTouch: None]
 		LThumbstickDown           = 0x00000020, ///< Maps to Physical Button: [Gamepad, Touch, LTouch: LThumbstickDown], [RTouch: None]
@@ -221,6 +214,7 @@ public class OVRInput
 		None                      = 0,                          ///< Null controller.
 		LTouch                    = 0x00000001,                 ///< Left Oculus Touch controller. Virtual input mapping differs from the combined L/R Touch mapping.
 		RTouch                    = 0x00000002,                 ///< Right Oculus Touch controller. Virtual input mapping differs from the combined L/R Touch mapping.
+		Remote                    = 0x00000004,                 ///< Oculus Remote controller.
 		Touch                     = LTouch | RTouch,            ///< Combined Left/Right pair of Oculus Touch controllers.
 		Gamepad                   = 0x00000008,                 ///< Xbox 360 or Xbox One gamepad on PC. Generic gamepad on Android.
 		Active                    = unchecked((int)0x80000000), ///< Default controller. Represents the controller that most recently registered a button press from the user.
@@ -228,15 +222,15 @@ public class OVRInput
 	}
 
 	private static readonly float AXIS_AS_BUTTON_THRESHOLD = 0.5f;
-	private static readonly float AXIS_DEADZONE_THRESHOLD = 0.15f;
-	private List<OVRControllerBase> controllers;
-	private Controller activeControllerType = Controller.None;
-	private Controller connectedControllerTypes = Controller.None;
+	private static readonly float AXIS_DEADZONE_THRESHOLD = 0.2f;
+	private static List<OVRControllerBase> controllers;
+	private static Controller activeControllerType = Controller.None;
+	private static Controller connectedControllerTypes = Controller.None;
 
 	/// <summary>
-	/// Creates an instance of OVRInput. Called by OVRManager.
+	/// Creates an instance of OVRInput.
 	/// </summary>
-	public OVRInput()
+	static OVRInput()
 	{
 		controllers = new List<OVRControllerBase>
 		{
@@ -247,23 +241,16 @@ public class OVRInput
 			new OVRControllerTouch(),
 			new OVRControllerLTouch(),
 			new OVRControllerRTouch(),
+			new OVRControllerRemote(),
 #endif
 		};
 	}
 
 	/// <summary>
-	/// Updates the internal state of the OVRInput. Called by OVRManager.
+	/// Updates the internal state of the OVRInput. Must be called manually if used independently from OVRManager.
 	/// </summary>
-	public void Update()
+	public static void Update()
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return;
-#else
-		if (!OVRManager.isHmdPresent)
-			return;
-#endif
-
 		connectedControllerTypes = Controller.None;
 
 		for (int i = 0; i < controllers.Count; i++)
@@ -291,35 +278,37 @@ public class OVRInput
 	}
 
 	/// <summary>
-	/// Gets the position of the given Hand local to its tracking space.
+	/// Returns true if the given Controller's orientation is currently tracked.
+	/// Only supported for Oculus LTouch and RTouch controllers. Non-tracked controllers will return false.
 	/// </summary>
-	public static Vector3 GetLocalHandPosition(OVRInput.Hand hand)
+	public static bool GetControllerOrientationTracked(OVRInput.Controller controllerType)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return Vector3.zero;
-#else
-		if (!OVRManager.isHmdPresent)
-			return Vector3.zero;
-#endif
-
-		return OVRPlugin.GetNodePose((OVRPlugin.Node)hand).ToOVRPose().position;
+		switch (controllerType)
+		{
+			case Controller.LTouch:
+                return OVRPlugin.GetNodeOrientationTracked(OVRPlugin.Node.HandLeft);
+            case Controller.RTouch:
+                return OVRPlugin.GetNodeOrientationTracked(OVRPlugin.Node.HandRight);
+            default:
+				return false;
+		}
 	}
 
 	/// <summary>
-	/// Gets the rotation of the given Hand local to its tracking space.
+	/// Returns true if the given Controller's position is currently tracked.
+	/// Only supported for Oculus LTouch and RTouch controllers. Non-tracked controllers will return false.
 	/// </summary>
-	public static Quaternion GetLocalHandRotation(OVRInput.Hand hand)
+	public static bool GetControllerPositionTracked(OVRInput.Controller controllerType)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return Quaternion.identity;
-#else
-		if (!OVRManager.isHmdPresent)
-			return Quaternion.identity;
-#endif
-
-		return OVRPlugin.GetNodePose((OVRPlugin.Node)hand).ToOVRPose().orientation;
+		switch (controllerType)
+		{
+			case Controller.LTouch:
+                return OVRPlugin.GetNodePositionTracked(OVRPlugin.Node.HandLeft);
+            case Controller.RTouch:
+                return OVRPlugin.GetNodePositionTracked(OVRPlugin.Node.HandRight);
+            default:
+				return false;
+		}
 	}
 
 	/// <summary>
@@ -328,24 +317,50 @@ public class OVRInput
 	/// </summary>
 	public static Vector3 GetLocalControllerPosition(OVRInput.Controller controllerType)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return Vector3.zero;
-#else
-		if (!OVRManager.isHmdPresent)
-			return Vector3.zero;
-#endif
-
 		switch (controllerType)
 		{
 			case Controller.LTouch:
-				return GetLocalHandPosition(OVRInput.Hand.Left);
-			case Controller.RTouch:
-				return GetLocalHandPosition(OVRInput.Hand.Right);
-			default:
+                return OVRPlugin.GetNodePose(OVRPlugin.Node.HandLeft).ToOVRPose().position;
+            case Controller.RTouch:
+                return OVRPlugin.GetNodePose(OVRPlugin.Node.HandRight).ToOVRPose().position;
+            default:
 				return Vector3.zero;
 		}
 	}
+
+	/// <summary>
+    /// Gets the linear velocity of the given Controller local to its tracking space.
+    /// Only supported for Oculus LTouch and RTouch controllers. Non-tracked controllers will return Vector3.zero.
+    /// </summary>
+    public static Vector3 GetLocalControllerVelocity(OVRInput.Controller controllerType)
+    {
+        switch (controllerType)
+        {
+            case Controller.LTouch:
+                return OVRPlugin.GetNodeVelocity(OVRPlugin.Node.HandLeft).ToOVRPose().position;
+            case Controller.RTouch:
+                return OVRPlugin.GetNodeVelocity(OVRPlugin.Node.HandRight).ToOVRPose().position;
+            default:
+                return Vector3.zero;
+        }
+    }
+
+    /// <summary>
+    /// Gets the linear acceleration of the given Controller local to its tracking space.
+    /// Only supported for Oculus LTouch and RTouch controllers. Non-tracked controllers will return Vector3.zero.
+    /// </summary>
+    public static Vector3 GetLocalControllerAcceleration(OVRInput.Controller controllerType)
+    {
+        switch (controllerType)
+        {
+            case Controller.LTouch:
+                return OVRPlugin.GetNodeAcceleration(OVRPlugin.Node.HandLeft).ToOVRPose().position;
+            case Controller.RTouch:
+                return OVRPlugin.GetNodeAcceleration(OVRPlugin.Node.HandRight).ToOVRPose().position;
+            default:
+                return Vector3.zero;
+        }
+    }
 
 	/// <summary>
 	/// Gets the rotation of the given Controller local to its tracking space.
@@ -353,24 +368,50 @@ public class OVRInput
 	/// </summary>
 	public static Quaternion GetLocalControllerRotation(OVRInput.Controller controllerType)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return Quaternion.identity;
-#else
-		if (!OVRManager.isHmdPresent)
-			return Quaternion.identity;
-#endif
-
 		switch (controllerType)
 		{
 			case Controller.LTouch:
-				return GetLocalHandRotation(OVRInput.Hand.Left);
-			case Controller.RTouch:
-				return GetLocalHandRotation(OVRInput.Hand.Right);
-			default:
+                return OVRPlugin.GetNodePose(OVRPlugin.Node.HandLeft).ToOVRPose().orientation;
+            case Controller.RTouch:
+                return OVRPlugin.GetNodePose(OVRPlugin.Node.HandRight).ToOVRPose().orientation;
+            default:
 				return Quaternion.identity;
 		}
 	}
+
+    /// <summary>
+    /// Gets the angular velocity of the given Controller local to its tracking space.
+    /// Only supported for Oculus LTouch and RTouch controllers. Non-tracked controllers will return Quaternion.identity.
+    /// </summary>
+    public static Quaternion GetLocalControllerAngularVelocity(OVRInput.Controller controllerType)
+    {
+        switch (controllerType)
+        {
+            case Controller.LTouch:
+                return OVRPlugin.GetNodeVelocity(OVRPlugin.Node.HandLeft).ToOVRPose().orientation;
+            case Controller.RTouch:
+                return OVRPlugin.GetNodeVelocity(OVRPlugin.Node.HandRight).ToOVRPose().orientation;
+            default:
+                return Quaternion.identity;
+        }
+    }
+
+    /// <summary>
+    /// Gets the angular acceleration of the given Controller local to its tracking space.
+    /// Only supported for Oculus LTouch and RTouch controllers. Non-tracked controllers will return Quaternion.identity.
+    /// </summary>
+    public static Quaternion GetLocalControllerAngularAcceleration(OVRInput.Controller controllerType)
+    {
+        switch (controllerType)
+        {
+            case Controller.LTouch:
+                return OVRPlugin.GetNodeAcceleration(OVRPlugin.Node.HandLeft).ToOVRPose().orientation;
+            case Controller.RTouch:
+                return OVRPlugin.GetNodeAcceleration(OVRPlugin.Node.HandRight).ToOVRPose().orientation;
+            default:
+                return Quaternion.identity;
+        }
+    }
 
 	/// <summary>
 	/// Gets the current state of the given virtual button mask with the given controller mask.
@@ -378,7 +419,7 @@ public class OVRInput
 	/// </summary>
 	public static bool Get(Button virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedButton(virtualMask, RawButton.None, controllerMask);
+		return GetResolvedButton(virtualMask, RawButton.None, controllerMask);
 	}
 
 	/// <summary>
@@ -387,19 +428,11 @@ public class OVRInput
 	/// </summary>
 	public static bool Get(RawButton rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedButton(Button.None, rawMask, controllerMask);
+		return GetResolvedButton(Button.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedButton(Button virtualMask, RawButton rawMask, Controller controllerMask)
+	private static bool GetResolvedButton(Button virtualMask, RawButton rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		if ((controllerMask & Controller.Active) != 0)
 			controllerMask |= activeControllerType;
 
@@ -411,7 +444,7 @@ public class OVRInput
 			{
 				RawButton resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawButton)controller.currentInputState.Buttons & resolvedMask) != 0)
+				if (((RawButton)controller.currentState.Buttons & resolvedMask) != 0)
 				{
 					return true;
 				}
@@ -427,7 +460,7 @@ public class OVRInput
 	/// </summary>
 	public static bool GetDown(Button virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedButtonDown(virtualMask, RawButton.None, controllerMask);
+		return GetResolvedButtonDown(virtualMask, RawButton.None, controllerMask);
 	}
 
 	/// <summary>
@@ -436,19 +469,11 @@ public class OVRInput
 	/// </summary>
 	public static bool GetDown(RawButton rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedButtonDown(Button.None, rawMask, controllerMask);
+		return GetResolvedButtonDown(Button.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedButtonDown(Button virtualMask, RawButton rawMask, Controller controllerMask)
+	private static bool GetResolvedButtonDown(Button virtualMask, RawButton rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		bool down = false;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -462,13 +487,13 @@ public class OVRInput
 			{
 				RawButton resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawButton)controller.previousInputState.Buttons & resolvedMask) != 0)
+				if (((RawButton)controller.previousState.Buttons & resolvedMask) != 0)
 				{
 					return false;
 				}
 
-				if ((((RawButton)controller.currentInputState.Buttons & resolvedMask) != 0)
-					&& (((RawButton)controller.previousInputState.Buttons & resolvedMask) == 0))
+				if ((((RawButton)controller.currentState.Buttons & resolvedMask) != 0)
+					&& (((RawButton)controller.previousState.Buttons & resolvedMask) == 0))
 				{
 					down = true;
 				}
@@ -484,7 +509,7 @@ public class OVRInput
 	/// </summary>
 	public static bool GetUp(Button virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedButtonUp(virtualMask, RawButton.None, controllerMask);
+		return GetResolvedButtonUp(virtualMask, RawButton.None, controllerMask);
 	}
 
 	/// <summary>
@@ -493,19 +518,11 @@ public class OVRInput
 	/// </summary>
 	public static bool GetUp(RawButton rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedButtonUp(Button.None, rawMask, controllerMask);
+		return GetResolvedButtonUp(Button.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedButtonUp(Button virtualMask, RawButton rawMask, Controller controllerMask)
+	private static bool GetResolvedButtonUp(Button virtualMask, RawButton rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		bool up = false;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -519,13 +536,13 @@ public class OVRInput
 			{
 				RawButton resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawButton)controller.currentInputState.Buttons & resolvedMask) != 0)
+				if (((RawButton)controller.currentState.Buttons & resolvedMask) != 0)
 				{
 					return false;
 				}
 
-				if ((((RawButton)controller.currentInputState.Buttons & resolvedMask) == 0)
-					&& (((RawButton)controller.previousInputState.Buttons & resolvedMask) != 0))
+				if ((((RawButton)controller.currentState.Buttons & resolvedMask) == 0)
+					&& (((RawButton)controller.previousState.Buttons & resolvedMask) != 0))
 				{
 					up = true;
 				}
@@ -541,7 +558,7 @@ public class OVRInput
 	/// </summary>
 	public static bool Get(Touch virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedTouch(virtualMask, RawTouch.None, controllerMask);
+		return GetResolvedTouch(virtualMask, RawTouch.None, controllerMask);
 	}
 
 	/// <summary>
@@ -550,19 +567,11 @@ public class OVRInput
 	/// </summary>
 	public static bool Get(RawTouch rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedTouch(Touch.None, rawMask, controllerMask);
+		return GetResolvedTouch(Touch.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedTouch(Touch virtualMask, RawTouch rawMask, Controller controllerMask)
+	private static bool GetResolvedTouch(Touch virtualMask, RawTouch rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		if ((controllerMask & Controller.Active) != 0)
 			controllerMask |= activeControllerType;
 
@@ -574,7 +583,7 @@ public class OVRInput
 			{
 				RawTouch resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawTouch)controller.currentInputState.Touches & resolvedMask) != 0)
+				if (((RawTouch)controller.currentState.Touches & resolvedMask) != 0)
 				{
 					return true;
 				}
@@ -590,7 +599,7 @@ public class OVRInput
 	/// </summary>
 	public static bool GetDown(Touch virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedTouchDown(virtualMask, RawTouch.None, controllerMask);
+		return GetResolvedTouchDown(virtualMask, RawTouch.None, controllerMask);
 	}
 
 	/// <summary>
@@ -599,19 +608,11 @@ public class OVRInput
 	/// </summary>
 	public static bool GetDown(RawTouch rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedTouchDown(Touch.None, rawMask, controllerMask);
+		return GetResolvedTouchDown(Touch.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedTouchDown(Touch virtualMask, RawTouch rawMask, Controller controllerMask)
+	private static bool GetResolvedTouchDown(Touch virtualMask, RawTouch rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		bool down = false;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -625,13 +626,13 @@ public class OVRInput
 			{
 				RawTouch resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawTouch)controller.previousInputState.Touches & resolvedMask) != 0)
+				if (((RawTouch)controller.previousState.Touches & resolvedMask) != 0)
 				{
 					return false;
 				}
 
-				if ((((RawTouch)controller.currentInputState.Touches & resolvedMask) != 0)
-					&& (((RawTouch)controller.previousInputState.Touches & resolvedMask) == 0))
+				if ((((RawTouch)controller.currentState.Touches & resolvedMask) != 0)
+					&& (((RawTouch)controller.previousState.Touches & resolvedMask) == 0))
 				{
 					down = true;
 				}
@@ -647,7 +648,7 @@ public class OVRInput
 	/// </summary>
 	public static bool GetUp(Touch virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedTouchUp(virtualMask, RawTouch.None, controllerMask);
+		return GetResolvedTouchUp(virtualMask, RawTouch.None, controllerMask);
 	}
 
 	/// <summary>
@@ -656,19 +657,11 @@ public class OVRInput
 	/// </summary>
 	public static bool GetUp(RawTouch rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedTouchUp(Touch.None, rawMask, controllerMask);
+		return GetResolvedTouchUp(Touch.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedTouchUp(Touch virtualMask, RawTouch rawMask, Controller controllerMask)
+	private static bool GetResolvedTouchUp(Touch virtualMask, RawTouch rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		bool up = false;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -682,13 +675,13 @@ public class OVRInput
 			{
 				RawTouch resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawTouch)controller.currentInputState.Touches & resolvedMask) != 0)
+				if (((RawTouch)controller.currentState.Touches & resolvedMask) != 0)
 				{
 					return false;
 				}
 
-				if ((((RawTouch)controller.currentInputState.Touches & resolvedMask) == 0)
-					&& (((RawTouch)controller.previousInputState.Touches & resolvedMask) != 0))
+				if ((((RawTouch)controller.currentState.Touches & resolvedMask) == 0)
+					&& (((RawTouch)controller.previousState.Touches & resolvedMask) != 0))
 				{
 					up = true;
 				}
@@ -704,7 +697,7 @@ public class OVRInput
 	/// </summary>
 	public static bool Get(NearTouch virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedNearTouch(virtualMask, RawNearTouch.None, controllerMask);
+		return GetResolvedNearTouch(virtualMask, RawNearTouch.None, controllerMask);
 	}
 
 	/// <summary>
@@ -713,19 +706,11 @@ public class OVRInput
 	/// </summary>
 	public static bool Get(RawNearTouch rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedNearTouch(NearTouch.None, rawMask, controllerMask);
+		return GetResolvedNearTouch(NearTouch.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedNearTouch(NearTouch virtualMask, RawNearTouch rawMask, Controller controllerMask)
+	private static bool GetResolvedNearTouch(NearTouch virtualMask, RawNearTouch rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		if ((controllerMask & Controller.Active) != 0)
 			controllerMask |= activeControllerType;
 
@@ -737,7 +722,7 @@ public class OVRInput
 			{
 				RawNearTouch resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawNearTouch)controller.currentInputState.NearTouches & resolvedMask) != 0)
+				if (((RawNearTouch)controller.currentState.NearTouches & resolvedMask) != 0)
 				{
 					return true;
 				}
@@ -753,7 +738,7 @@ public class OVRInput
 	/// </summary>
 	public static bool GetDown(NearTouch virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedNearTouchDown(virtualMask, RawNearTouch.None, controllerMask);
+		return GetResolvedNearTouchDown(virtualMask, RawNearTouch.None, controllerMask);
 	}
 
 	/// <summary>
@@ -762,19 +747,11 @@ public class OVRInput
 	/// </summary>
 	public static bool GetDown(RawNearTouch rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedNearTouchDown(NearTouch.None, rawMask, controllerMask);
+		return GetResolvedNearTouchDown(NearTouch.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedNearTouchDown(NearTouch virtualMask, RawNearTouch rawMask, Controller controllerMask)
+	private static bool GetResolvedNearTouchDown(NearTouch virtualMask, RawNearTouch rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		bool down = false;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -788,13 +765,13 @@ public class OVRInput
 			{
 				RawNearTouch resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawNearTouch)controller.previousInputState.NearTouches & resolvedMask) != 0)
+				if (((RawNearTouch)controller.previousState.NearTouches & resolvedMask) != 0)
 				{
 					return false;
 				}
 
-				if ((((RawNearTouch)controller.currentInputState.NearTouches & resolvedMask) != 0)
-					&& (((RawNearTouch)controller.previousInputState.NearTouches & resolvedMask) == 0))
+				if ((((RawNearTouch)controller.currentState.NearTouches & resolvedMask) != 0)
+					&& (((RawNearTouch)controller.previousState.NearTouches & resolvedMask) == 0))
 				{
 					down = true;
 				}
@@ -810,7 +787,7 @@ public class OVRInput
 	/// </summary>
 	public static bool GetUp(NearTouch virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedNearTouchUp(virtualMask, RawNearTouch.None, controllerMask);
+		return GetResolvedNearTouchUp(virtualMask, RawNearTouch.None, controllerMask);
 	}
 
 	/// <summary>
@@ -819,19 +796,11 @@ public class OVRInput
 	/// </summary>
 	public static bool GetUp(RawNearTouch rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedNearTouchUp(NearTouch.None, rawMask, controllerMask);
+		return GetResolvedNearTouchUp(NearTouch.None, rawMask, controllerMask);
 	}
 
-	private bool GetResolvedNearTouchUp(NearTouch virtualMask, RawNearTouch rawMask, Controller controllerMask)
+	private static bool GetResolvedNearTouchUp(NearTouch virtualMask, RawNearTouch rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return false;
-#else
-		if (!OVRManager.isHmdPresent)
-			return false;
-#endif
-
 		bool up = false;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -845,13 +814,13 @@ public class OVRInput
 			{
 				RawNearTouch resolvedMask = rawMask | controller.ResolveToRawMask(virtualMask);
 
-				if (((RawNearTouch)controller.currentInputState.NearTouches & resolvedMask) != 0)
+				if (((RawNearTouch)controller.currentState.NearTouches & resolvedMask) != 0)
 				{
 					return false;
 				}
 
-				if ((((RawNearTouch)controller.currentInputState.NearTouches & resolvedMask) == 0)
-					&& (((RawNearTouch)controller.previousInputState.NearTouches & resolvedMask) != 0))
+				if ((((RawNearTouch)controller.currentState.NearTouches & resolvedMask) == 0)
+					&& (((RawNearTouch)controller.previousState.NearTouches & resolvedMask) != 0))
 				{
 					up = true;
 				}
@@ -867,7 +836,7 @@ public class OVRInput
 	/// </summary>
 	public static float Get(Axis1D virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedAxis1D(virtualMask, RawAxis1D.None, controllerMask);
+		return GetResolvedAxis1D(virtualMask, RawAxis1D.None, controllerMask);
 	}
 
 	/// <summary>
@@ -876,19 +845,11 @@ public class OVRInput
 	/// </summary>
 	public static float Get(RawAxis1D rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedAxis1D(Axis1D.None, rawMask, controllerMask);
+		return GetResolvedAxis1D(Axis1D.None, rawMask, controllerMask);
 	}
 
-	private float GetResolvedAxis1D(Axis1D virtualMask, RawAxis1D rawMask, Controller controllerMask)
+	private static float GetResolvedAxis1D(Axis1D virtualMask, RawAxis1D rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return 0.0f;
-#else
-		if (!OVRManager.isHmdPresent)
-			return 0.0f;
-#endif
-
 		float maxAxis = 0.0f;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -904,19 +865,19 @@ public class OVRInput
 
 				if ((RawAxis1D.LIndexTrigger & resolvedMask) != 0)
 				{
-					maxAxis = CalculateAbsMax(maxAxis, controller.currentInputState.LIndexTrigger);
+					maxAxis = CalculateAbsMax(maxAxis, controller.currentState.LIndexTrigger);
 				}
 				if ((RawAxis1D.RIndexTrigger & resolvedMask) != 0)
 				{
-					maxAxis = CalculateAbsMax(maxAxis, controller.currentInputState.RIndexTrigger);
+					maxAxis = CalculateAbsMax(maxAxis, controller.currentState.RIndexTrigger);
 				}
 				if ((RawAxis1D.LHandTrigger & resolvedMask) != 0)
 				{
-					maxAxis = CalculateAbsMax(maxAxis, controller.currentInputState.LHandTrigger);
+					maxAxis = CalculateAbsMax(maxAxis, controller.currentState.LHandTrigger);
 				}
 				if ((RawAxis1D.RHandTrigger & resolvedMask) != 0)
 				{
-					maxAxis = CalculateAbsMax(maxAxis, controller.currentInputState.RHandTrigger);
+					maxAxis = CalculateAbsMax(maxAxis, controller.currentState.RHandTrigger);
 				}
 			}
 		}
@@ -932,7 +893,7 @@ public class OVRInput
 	/// </summary>
 	public static Vector2 Get(Axis2D virtualMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedAxis2D(virtualMask, RawAxis2D.None, controllerMask);
+		return GetResolvedAxis2D(virtualMask, RawAxis2D.None, controllerMask);
 	}
 
 	/// <summary>
@@ -941,19 +902,11 @@ public class OVRInput
 	/// </summary>
 	public static Vector2 Get(RawAxis2D rawMask, Controller controllerMask = Controller.Active)
 	{
-		return OVRManager.input.GetResolvedAxis2D(Axis2D.None, rawMask, controllerMask);
+		return GetResolvedAxis2D(Axis2D.None, rawMask, controllerMask);
 	}
 
-	private Vector2 GetResolvedAxis2D(Axis2D virtualMask, RawAxis2D rawMask, Controller controllerMask)
+	private static Vector2 GetResolvedAxis2D(Axis2D virtualMask, RawAxis2D rawMask, Controller controllerMask)
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return Vector2.zero;
-#else
-		if (!OVRManager.isHmdPresent)
-			return Vector2.zero;
-#endif
-
 		Vector2 maxAxis = Vector2.zero;
 
 		if ((controllerMask & Controller.Active) != 0)
@@ -970,16 +923,16 @@ public class OVRInput
 				if ((RawAxis2D.LThumbstick & resolvedMask) != 0)
 				{
 					Vector2 axis = new Vector2(
-						controller.currentInputState.LThumbstick.x,
-						controller.currentInputState.LThumbstick.y);
+						controller.currentState.LThumbstick.x,
+						controller.currentState.LThumbstick.y);
 
 					maxAxis = CalculateAbsMax(maxAxis, axis);
 				}
 				if ((RawAxis2D.RThumbstick & resolvedMask) != 0)
 				{
 					Vector2 axis = new Vector2(
-						controller.currentInputState.RThumbstick.x,
-						controller.currentInputState.RThumbstick.y);
+						controller.currentState.RThumbstick.x,
+						controller.currentState.RThumbstick.y);
 
 					maxAxis = CalculateAbsMax(maxAxis, axis);
 				}
@@ -996,15 +949,7 @@ public class OVRInput
 	/// </summary>
 	public static Controller GetConnectedControllers()
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return Controller.None;
-#else
-		if (!OVRManager.isHmdPresent)
-			return Controller.None;
-#endif
-
-		return OVRManager.input.connectedControllerTypes;
+		return connectedControllerTypes;
 	}
 
 	/// <summary>
@@ -1012,15 +957,7 @@ public class OVRInput
 	/// </summary>
 	public static Controller GetActiveController()
 	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return Controller.None;
-#else
-		if (!OVRManager.isHmdPresent)
-			return Controller.None;
-#endif
-
-		return OVRManager.input.activeControllerType;
+		return activeControllerType;
 	}
 
 	/// <summary>
@@ -1029,19 +966,6 @@ public class OVRInput
 	/// </summary>
 	public static void SetControllerVibration(float frequency, float amplitude, Controller controllerMask = Controller.Active)
 	{
-		OVRManager.input.SetControllerVibrationInternal(frequency, amplitude, controllerMask);
-	}
-
-	private void SetControllerVibrationInternal(float frequency, float amplitude, Controller controllerMask)
-	{
-#if OVR_LEGACY
-		if (!OVRManager.instance.isVRPresent)
-			return;
-#else
-		if (!OVRManager.isHmdPresent)
-			return;
-#endif
-
 		if ((controllerMask & Controller.Active) != 0)
 			controllerMask |= activeControllerType;
 
@@ -1056,7 +980,7 @@ public class OVRInput
 		}
 	}
 
-	private Vector2 CalculateAbsMax(Vector2 a, Vector2 b)
+	private static Vector2 CalculateAbsMax(Vector2 a, Vector2 b)
 	{
 		float absA = a.sqrMagnitude;
 		float absB = b.sqrMagnitude;
@@ -1066,7 +990,7 @@ public class OVRInput
 		return b;
 	}
 
-	private float CalculateAbsMax(float a, float b)
+	private static float CalculateAbsMax(float a, float b)
 	{
 		float absA = (a >= 0) ? a : -a;
 		float absB = (b >= 0) ? b : -b;
@@ -1076,7 +1000,7 @@ public class OVRInput
 		return b;
 	}
 
-	private Vector2 CalculateDeadzone(Vector2 a, float deadzone)
+	private static Vector2 CalculateDeadzone(Vector2 a, float deadzone)
 	{
 		if (a.sqrMagnitude <= (deadzone * deadzone))
 			return Vector2.zero;
@@ -1088,7 +1012,7 @@ public class OVRInput
 		return a;
 	}
 
-	private float CalculateDeadzone(float a, float deadzone)
+	private static float CalculateDeadzone(float a, float deadzone)
 	{
 		float mag = (a >= 0) ? a : -a;
 
@@ -1102,7 +1026,7 @@ public class OVRInput
 		return a;
 	}
 
-	private bool ShouldResolveController(Controller controllerType, Controller controllerMask)
+	private static bool ShouldResolveController(Controller controllerType, Controller controllerMask)
 	{
 		bool isValid = false;
 
@@ -1354,8 +1278,8 @@ public class OVRInput
 		public VirtualNearTouchMap nearTouchMap = new VirtualNearTouchMap();
 		public VirtualAxis1DMap axis1DMap = new VirtualAxis1DMap();
 		public VirtualAxis2DMap axis2DMap = new VirtualAxis2DMap();
-		public OVRPlugin.InputState previousInputState = new OVRPlugin.InputState();
-		public OVRPlugin.InputState currentInputState = new OVRPlugin.InputState();
+		public OVRPlugin.ControllerState previousState = new OVRPlugin.ControllerState();
+		public OVRPlugin.ControllerState currentState = new OVRPlugin.ControllerState();
 
 		public OVRControllerBase()
 		{
@@ -1368,7 +1292,7 @@ public class OVRInput
 
 		public virtual Controller Update()
 		{
-			OVRPlugin.InputState state = OVRPlugin.GetInputState((uint)controllerType);
+			OVRPlugin.ControllerState state = OVRPlugin.GetControllerState((uint)controllerType);
 
 			if (state.LIndexTrigger >= AXIS_AS_BUTTON_THRESHOLD)
 				state.Buttons |= (uint)RawButton.LIndexTrigger;
@@ -1396,10 +1320,10 @@ public class OVRInput
 			if (state.RThumbstick.x >= AXIS_AS_BUTTON_THRESHOLD)
 				state.Buttons |= (uint)RawButton.RThumbstickRight;
 
-			previousInputState = currentInputState;
-			currentInputState = state;
+			previousState = currentState;
+			currentState = state;
 
-			return ((Controller)currentInputState.ConnectedControllers & controllerType);
+			return ((Controller)currentState.ConnectedControllers & controllerType);
 		}
 
 		public virtual void SetControllerVibration(float frequency, float amplitude)
@@ -1682,6 +1606,87 @@ public class OVRInput
 		}
 	}
 
+	private class OVRControllerRemote : OVRControllerBase
+	{
+		public OVRControllerRemote()
+		{
+			controllerType = Controller.Remote;
+		}
+
+		public override void ConfigureButtonMap()
+		{
+			buttonMap.None                     = RawButton.None;
+			buttonMap.One                      = RawButton.Start;
+			buttonMap.Two                      = RawButton.Back;
+			buttonMap.Three                    = RawButton.None;
+			buttonMap.Four                     = RawButton.None;
+			buttonMap.Start                    = RawButton.Start;
+			buttonMap.Back                     = RawButton.Back;
+			buttonMap.PrimaryShoulder          = RawButton.None;
+			buttonMap.PrimaryIndexTrigger      = RawButton.None;
+			buttonMap.PrimaryHandTrigger       = RawButton.None;
+			buttonMap.PrimaryThumbstick        = RawButton.None;
+			buttonMap.PrimaryThumbstickUp      = RawButton.None;
+			buttonMap.PrimaryThumbstickDown    = RawButton.None;
+			buttonMap.PrimaryThumbstickLeft    = RawButton.None;
+			buttonMap.PrimaryThumbstickRight   = RawButton.None;
+			buttonMap.SecondaryShoulder        = RawButton.None;
+			buttonMap.SecondaryIndexTrigger    = RawButton.None;
+			buttonMap.SecondaryHandTrigger     = RawButton.None;
+			buttonMap.SecondaryThumbstick      = RawButton.None;
+			buttonMap.SecondaryThumbstickUp    = RawButton.None;
+			buttonMap.SecondaryThumbstickDown  = RawButton.None;
+			buttonMap.SecondaryThumbstickLeft  = RawButton.None;
+			buttonMap.SecondaryThumbstickRight = RawButton.None;
+			buttonMap.DpadUp                   = RawButton.DpadUp;
+			buttonMap.DpadDown                 = RawButton.DpadDown;
+			buttonMap.DpadLeft                 = RawButton.DpadLeft;
+			buttonMap.DpadRight                = RawButton.DpadRight;
+			buttonMap.Up                       = RawButton.DpadUp;
+			buttonMap.Down                     = RawButton.DpadDown;
+			buttonMap.Left                     = RawButton.DpadLeft;
+			buttonMap.Right                    = RawButton.DpadRight;
+		}
+
+		public override void ConfigureTouchMap()
+		{
+			touchMap.None                      = RawTouch.None;
+			touchMap.One                       = RawTouch.None;
+			touchMap.Two                       = RawTouch.None;
+			touchMap.Three                     = RawTouch.None;
+			touchMap.Four                      = RawTouch.None;
+			touchMap.PrimaryIndexTrigger       = RawTouch.None;
+			touchMap.PrimaryThumbstick         = RawTouch.None;
+			touchMap.SecondaryIndexTrigger     = RawTouch.None;
+			touchMap.SecondaryThumbstick       = RawTouch.None;
+		}
+
+		public override void ConfigureNearTouchMap()
+		{
+			nearTouchMap.None                  = RawNearTouch.None;
+			nearTouchMap.PrimaryIndexTrigger   = RawNearTouch.None;
+			nearTouchMap.PrimaryThumbButtons   = RawNearTouch.None;
+			nearTouchMap.SecondaryIndexTrigger = RawNearTouch.None;
+			nearTouchMap.SecondaryThumbButtons = RawNearTouch.None;
+		}
+
+		public override void ConfigureAxis1DMap()
+		{
+			axis1DMap.None                     = RawAxis1D.None;
+			axis1DMap.PrimaryIndexTrigger      = RawAxis1D.None;
+			axis1DMap.PrimaryHandTrigger       = RawAxis1D.None;
+			axis1DMap.SecondaryIndexTrigger    = RawAxis1D.None;
+			axis1DMap.SecondaryHandTrigger     = RawAxis1D.None;
+		}
+
+		public override void ConfigureAxis2DMap()
+		{
+			axis2DMap.None                     = RawAxis2D.None;
+			axis2DMap.PrimaryThumbstick        = RawAxis2D.None;
+			axis2DMap.SecondaryThumbstick      = RawAxis2D.None;
+		}
+	}
+
 	private class OVRControllerGamepadDesktop : OVRControllerBase
 	{
 		/// <summary> An axis on the gamepad. </summary>
@@ -1770,7 +1775,7 @@ public class OVRInput
 				return Controller.None;
 			}
 
-			OVRPlugin.InputState state = new OVRPlugin.InputState();
+			OVRPlugin.ControllerState state = new OVRPlugin.ControllerState();
 
 			bool result = OVR_GamepadController_Update();
 
@@ -1839,10 +1844,10 @@ public class OVRInput
 			if (state.RThumbstick.x >= AXIS_AS_BUTTON_THRESHOLD)
 				state.Buttons |= (uint)RawButton.RThumbstickRight;
 
-			previousInputState = currentInputState;
-			currentInputState = state;
+			previousState = currentState;
+			currentState = state;
 
-			return ((Controller)currentInputState.ConnectedControllers & controllerType);
+			return ((Controller)currentState.ConnectedControllers & controllerType);
 		}
 
 		public override void ConfigureButtonMap()
@@ -1983,9 +1988,9 @@ public class OVRInput
 		private bool ShouldUpdate()
 		{
 			// Use Unity's joystick detection as a quick way to determine joystick availability.
-			if ((Time.time - joystickCheckTime) > joystickCheckInterval)
+			if ((Time.realtimeSinceStartup - joystickCheckTime) > joystickCheckInterval)
 			{
-				joystickCheckTime = Time.time;
+				joystickCheckTime = Time.realtimeSinceStartup;
 				joystickDetected = false;
 				var joystickNames = UnityEngine.Input.GetJoystickNames();
 
@@ -2009,7 +2014,7 @@ public class OVRInput
 				return Controller.None;
 			}
 
-			OVRPlugin.InputState state = new OVRPlugin.InputState();
+			OVRPlugin.ControllerState state = new OVRPlugin.ControllerState();
 
 			state.ConnectedControllers = (uint)Controller.Gamepad;
 
@@ -2079,10 +2084,10 @@ public class OVRInput
 			if (dpadY >= AXIS_AS_BUTTON_THRESHOLD)
 				state.Buttons |= (uint)RawButton.DpadUp;
 
-			previousInputState = currentInputState;
-			currentInputState = state;
+			previousState = currentState;
+			currentState = state;
 
-			return ((Controller)currentInputState.ConnectedControllers & controllerType);
+			return ((Controller)currentState.ConnectedControllers & controllerType);
 		}
 
 		public override void ConfigureButtonMap()

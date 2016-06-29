@@ -86,7 +86,7 @@ public class Calibration {
 			measurementsY[it, 0] = 1;
 			measurementsY[it, 1] = x;
 			measurementsY[it, 2] = y;
-			measurementsY[it, 3] = y * y;
+			measurementsY[it, 3] = x * y;
 
 			calibrationPointX[it,0] = calibrationData[it].point.x;
 			calibrationPointY[it,0] = calibrationData[it].point.y;
@@ -102,9 +102,9 @@ public class Calibration {
 		Debug.Log (coefficientsX);
 		Debug.Log (coefficientsY);
 
-		System.IO.File.WriteAllText("calibDatacoffX.txt", coefficientsX.ToString());
+		//System.IO.File.WriteAllText("calibDatacoffX.txt", coefficientsX.ToString());
 
-		System.IO.File.WriteAllText("calibDatacoffY.txt", coefficientsY.ToString());
+		//System.IO.File.WriteAllText("calibDatacoffY.txt", coefficientsY.ToString());
 		//		
 //		MathNet.Numerics.LinearAlgebra.Factorization.Svd<float> svd = measurementsX.Svd();
 //		coefficientsX = svd.Solve (calibrationPointX);
@@ -146,8 +146,8 @@ public class Calibration {
 		float b2 = (float)coefficientsY[2, 0];
 		float b3 = (float)coefficientsY[3, 0];
 
-		Debug.Log("A: " +a0+", "+a1 + ", " +a2+", "+a3);
-		Debug.Log("B: " +b0+", "+b1 + ", " +b2+", "+b3);
+		//Debug.Log("A: " +a0+", "+a1 + ", " +a2+", "+a3);
+		//Debug.Log("B: " +b0+", "+b1 + ", " +b2+", "+b3);
 
 		float x = (a0 + a1 * vector.x + a2 * vector.y + a3 * vector.x * vector.y);
 		float y = (b0 + b1 * vector.x + b2 * vector.y + b3 * vector.x * vector.y);

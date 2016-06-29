@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+//using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +10,12 @@ using Newtonsoft.Json;
 public class CalibScript : MonoBehaviour {
 	public bool IsCalibrating;
 	public EchoTest tracker;
-	public int SamplesPerPoint = 50;
-	public int PrematureSamplesKillCount = 50;
+	public int SamplesPerPoint = 150;
+	public int PrematureSamplesKillCount = 75;
 	public int SavedSamplesKillCount = 100;
-	public float XRange = 5;
-	public float YRange = 3;
-	public bool useRecordedData = true;
+	public float XRange = 4;
+	public float YRange = 2;
+	public bool useRecordedData = false;
 
 	List<Vector2> calibDataCenter = new List<Vector2>();
 	List<Vector2> calibDataTL = new List<Vector2>();
@@ -21,6 +23,7 @@ public class CalibScript : MonoBehaviour {
 	List<Vector2> calibDataBL = new List<Vector2>();
 	List<Vector2> calibDataBR = new List<Vector2>();
 
+	public Text statText;
 	Transform cS;
 
 	// Use this for initialization
@@ -39,6 +42,8 @@ public class CalibScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {		
 		if (useRecordedData && IsCalibrating) {
+			statText.text = "Recorded - Start";
+
 			//Load Data
 			JsonSerializerSettings serSet = new JsonSerializerSettings ();		 
 			serSet.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -90,72 +95,103 @@ public class CalibScript : MonoBehaviour {
 			//Update calib in tracker
 			tracker.CurrentCalibration = newCalib;
 
+			statText.text = "Recorded - Set calib successfully";
+
 			cS.localPosition = new Vector3 (20.0f, 0.0f, 1.32f);
 			IsCalibrating = false;
+
+			statText.text = "Recorded - Done";
 
 		} else{
 			//Step through positions
 			if (IsCalibrating && calibDataCenter.Count < SamplesPerPoint) {
+				statText.text = "Live - Center: "+calibDataCenter.Count;
 				//Set sphere position
 				cS.localPosition = new Vector3 (0.0f, 0.0f, 1.32f);
+				float sF = 3 - (calibDataCenter.Count / 50);
+				cS.localScale = new Vector3(sF, sF, sF);
 				//Collect samples
-				if (calibDataCenter.Count == 0 || tracker.lastVector != calibDataCenter [calibDataCenter.Count - 1])
+				if (calibDataCenter.Count == 0 || tracker.lastVector != calibDataCenter [calibDataCenter.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataCenter.Add (tracker.lastVector);
-				Debug.Log ("Center: Added " + tracker.lastVector + " , now having " + calibDataCenter.Count + " samples");
+					Debug.Log ("Center: Added " + tracker.lastVector + " , now having " + calibDataCenter.Count + " samples");
+				}
 			} else if (IsCalibrating && calibDataTL.Count < SamplesPerPoint) {
+				statText.text = "Live - TL"+calibDataTL.Count;
 				//Set sphere position
 				cS.localPosition = new Vector3 (0.0f, YRange, 1.32f);
+				float sF = 3 - (calibDataTL.Count / 50);
+				cS.localScale = new Vector3(sF, sF, sF);
 				//Collect samples
-				if (calibDataTL.Count == 0 || tracker.lastVector != calibDataTL [calibDataTL.Count - 1])
+				if (calibDataTL.Count == 0 || tracker.lastVector != calibDataTL [calibDataTL.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataTL.Add (tracker.lastVector);
-				Debug.Log ("TL: Added " + tracker.lastVector + " , now having " + calibDataTL.Count + " samples");
+					Debug.Log ("TL: Added " + tracker.lastVector + " , now having " + calibDataTL.Count + " samples");
+				}
 			} else if (IsCalibrating && calibDataTR.Count < SamplesPerPoint) {
+				statText.text = "Live - TR"+calibDataTR.Count;
 				//Set sphere position
 				cS.localPosition = new Vector3 (0.0f, -YRange, 1.32f);
+				float sF = 3 - (calibDataTR.Count / 50);
+				cS.localScale = new Vector3(sF, sF, sF);
 				//Collect samples
-				if (calibDataTR.Count == 0 || tracker.lastVector != calibDataTR [calibDataTR.Count - 1])
+				if (calibDataTR.Count == 0 || tracker.lastVector != calibDataTR [calibDataTR.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataTR.Add (tracker.lastVector);
-				Debug.Log ("TR: Added " + tracker.lastVector + " , now having " + calibDataTR.Count + " samples");
+					Debug.Log ("TR: Added " + tracker.lastVector + " , now having " + calibDataTR.Count + " samples");
+				}
 			} else if (IsCalibrating && calibDataBL.Count < SamplesPerPoint) {
+				statText.text = "Live - BL"+calibDataBL.Count;
 				//Set sphere position
 				cS.localPosition = new Vector3 (-XRange, 0.0f, 1.32f);
+				float sF = 3 - (calibDataBL.Count / 50);
+				cS.localScale = new Vector3(sF, sF, sF);
 				//Collect samples
-				if (calibDataBL.Count == 0 || tracker.lastVector != calibDataBL [calibDataBL.Count - 1])
+				if (calibDataBL.Count == 0 || tracker.lastVector != calibDataBL [calibDataBL.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataBL.Add (tracker.lastVector);
-				Debug.Log ("BL: Added " + tracker.lastVector + " , now having " + calibDataBL.Count + " samples");
+					Debug.Log ("BL: Added " + tracker.lastVector + " , now having " + calibDataBL.Count + " samples"); 
+				}
 			} else if (IsCalibrating && calibDataBR.Count < SamplesPerPoint) {
+				statText.text = "Live - BR"+calibDataBR.Count;
 				//Set sphere position
 				cS.localPosition = new Vector3 (XRange, 0.0f, 1.32f);
+				float sF = 3 - (calibDataBR
+					.Count / 50);
+				cS.localScale = new Vector3(sF, sF, sF);
 				//Collect samples
-				if (calibDataBR.Count == 0 || tracker.lastVector != calibDataBR [calibDataBR.Count - 1])
+				if (calibDataBR.Count == 0 || tracker.lastVector != calibDataBR [calibDataBR.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataBR.Add (tracker.lastVector);
-				Debug.Log ("BR: Added " + tracker.lastVector + " , now having " + calibDataBR.Count + " samples");
+					Debug.Log ("BR: Added " + tracker.lastVector + " , now having " + calibDataBR.Count + " samples");
+				}
 			} else if (IsCalibrating) {
+				statText.text = "Live - DONE";
+				IsCalibrating = false;
+
+				statText.text = "Live - Truncating...";
 				//Truncate lists
 				calibDataCenter.RemoveRange (0, PrematureSamplesKillCount);
 				calibDataTL.RemoveRange (0, PrematureSamplesKillCount);
 				calibDataBL.RemoveRange (0, PrematureSamplesKillCount);
 				calibDataTR.RemoveRange (0, PrematureSamplesKillCount);
 				calibDataBR.RemoveRange (0, PrematureSamplesKillCount);
-
-				JsonSerializerSettings serSet = new JsonSerializerSettings ();		 
+				statText.text = "Live - Truncating done";
+				/*JsonSerializerSettings serSet = new JsonSerializerSettings ();		 
 				serSet.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
 				System.IO.File.WriteAllText ("calibDataCenter.txt", JsonConvert.SerializeObject (calibDataCenter, serSet));
 				System.IO.File.WriteAllText ("calibDataTL.txt", JsonConvert.SerializeObject (calibDataTL, serSet));
 				System.IO.File.WriteAllText ("calibDataBL.txt", JsonConvert.SerializeObject (calibDataBL, serSet));
 				System.IO.File.WriteAllText ("calibDataTR.txt", JsonConvert.SerializeObject (calibDataTR, serSet));
-				System.IO.File.WriteAllText ("calibDataBR.txt", JsonConvert.SerializeObject (calibDataBR, serSet));
+				System.IO.File.WriteAllText ("calibDataBR.txt", JsonConvert.SerializeObject (calibDataBR, serSet));*/
 
 				//Enough data, calculate
 				//NaiveLinearCalibration();
 				Calibration newCalib = NonLinearMRCalibration ();
+				statText.text = "Live - Calib done";
 
 				//Update calib in tracker
 				tracker.CurrentCalibration = newCalib;
+				statText.text = "Live - Calib applied";
 
 				cS.localPosition = new Vector3 (20.0f, 0.0f, 1.32f);
-				IsCalibrating = false;
+				statText.text = "Live - Done";
 			}
 		}
 	}
@@ -212,16 +248,16 @@ public class CalibScript : MonoBehaviour {
 		CalibrationData cdCenter = new CalibrationData (new Vector2(0, 0), calibDataCenter);
 		cds.Add (cdCenter);
 
-		CalibrationData cdTL = new CalibrationData (new Vector2 (-XRange, YRange), calibDataTL);
+		CalibrationData cdTL = new CalibrationData (new Vector2 (0.0f, YRange), calibDataTL);
 		cds.Add (cdTL);
 
-		CalibrationData cdTR = new CalibrationData (new Vector2 (XRange, YRange), calibDataTR);
+		CalibrationData cdTR = new CalibrationData (new Vector2 (0.0f, -YRange), calibDataTR);
 		cds.Add (cdTR);
 
-		CalibrationData cdBL = new CalibrationData (new Vector2 (-XRange, -YRange), calibDataBL);
+		CalibrationData cdBL = new CalibrationData (new Vector2 (-XRange, 0.0f), calibDataBL);
 		cds.Add (cdBL);
 
-		CalibrationData cdBR = new CalibrationData (new Vector2 (XRange, -YRange), calibDataBR);
+		CalibrationData cdBR = new CalibrationData (new Vector2 (XRange, 0.0f), calibDataBR);
 		cds.Add (cdBR);
 
 		calib.calibrationData = cds;

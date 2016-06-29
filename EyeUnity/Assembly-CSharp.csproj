@@ -50,6 +50,16 @@
      <Compile Include="Assets\CalibrationData.cs" />
      <Compile Include="Assets\Example\EchoTest.cs" />
      <Compile Include="Assets\Example\EyeData.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\OVRDebugHeadController.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\OVROverlay.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\OVRPlatformMenu.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\OVRTouchpad.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\Utils\OVRChromaticAberration.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\Utils\OVRDebugGraph.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\Utils\OVRModeParms.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\Utils\OVRMonoscopic.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\Utils\OVRResetOrientation.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Scripts\Utils\OVRWaitCursor.cs" />
      <Compile Include="Assets\OVR\Scripts\OVRCameraRig.cs" />
      <Compile Include="Assets\OVR\Scripts\OVRCommon.cs" />
      <Compile Include="Assets\OVR\Scripts\OVRDisplay.cs" />
@@ -59,14 +69,17 @@
      <Compile Include="Assets\OVR\Scripts\OVRPlugin.cs" />
      <Compile Include="Assets\OVR\Scripts\OVRProfile.cs" />
      <Compile Include="Assets\OVR\Scripts\OVRTracker.cs" />
+     <Compile Include="Assets\OVR\Scripts\OVRVolumeControl.cs" />
      <Compile Include="Assets\OVR\Scripts\Util\OVRDebugInfo.cs" />
-     <Compile Include="Assets\OVR\Scripts\Util\OVRGamepadController.cs" />
      <Compile Include="Assets\OVR\Scripts\Util\OVRGridCube.cs" />
      <Compile Include="Assets\OVR\Scripts\Util\OVRPlayerController.cs" />
      <Compile Include="Assets\OVR\Scripts\Util\OVRSceneSampleController.cs" />
      <Compile Include="Assets\OVR\Scripts\Util\OVRScreenFade.cs" />
      <Compile Include="Assets\OVR\Scripts\Util\OVRTrackerBounds.cs" />
      <Compile Include="Assets\OneEuroFilter.cs" />
+     <None Include="Assets\OVR\Moonlight\Shaders\OVRColorRampAlpha.shader" />
+     <None Include="Assets\OVR\Moonlight\Shaders\Unlit Crosshair.shader" />
+     <None Include="Assets\OVR\Moonlight\Resources\Unlit Transparent Color.shader" />
      <None Include="Assets\README.txt" />
  <Reference Include="UnityEngine.Networking">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
@@ -75,13 +88,13 @@
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="MathNet.Iridium">
- <HintPath>/Users/fg/EyeUnity/Assets/MathNet.Iridium.dll</HintPath>
+ <HintPath>/Users/fg/Documents/eyevr_git/EyeUnity/Assets/MathNet.Iridium.dll</HintPath>
  </Reference>
  <Reference Include="Newtonsoft.Json">
- <HintPath>/Users/fg/EyeUnity/Assets/Plugins/Newtonsoft.Json.dll</HintPath>
+ <HintPath>/Users/fg/Documents/eyevr_git/EyeUnity/Assets/Plugins/Newtonsoft.Json.dll</HintPath>
  </Reference>
  <Reference Include="websocket-sharp">
- <HintPath>/Users/fg/EyeUnity/Assets/Plugins/websocket-sharp.dll</HintPath>
+ <HintPath>/Users/fg/Documents/eyevr_git/EyeUnity/Assets/Plugins/websocket-sharp.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>

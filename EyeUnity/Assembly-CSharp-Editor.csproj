@@ -46,6 +46,10 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\OVR\Editor\OVRBuild.cs" />
+     <Compile Include="Assets\OVR\Moonlight\Editor\OVRMoonlightLoader.cs" />
+     <None Include="Assets\OVR\Moonlight\Shaders\OVRColorRampAlpha.shader" />
+     <None Include="Assets\OVR\Moonlight\Shaders\Unlit Crosshair.shader" />
+     <None Include="Assets\OVR\Moonlight\Resources\Unlit Transparent Color.shader" />
      <None Include="Assets\README.txt" />
  <Reference Include="UnityEngine.Networking">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
@@ -72,13 +76,13 @@
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/TreeEditor/Editor/UnityEditor.TreeEditor.dll</HintPath>
  </Reference>
  <Reference Include="MathNet.Iridium">
- <HintPath>/Users/fg/EyeUnity/Assets/MathNet.Iridium.dll</HintPath>
+ <HintPath>/Users/fg/Documents/eyevr_git/EyeUnity/Assets/MathNet.Iridium.dll</HintPath>
  </Reference>
  <Reference Include="Newtonsoft.Json">
- <HintPath>/Users/fg/EyeUnity/Assets/Plugins/Newtonsoft.Json.dll</HintPath>
+ <HintPath>/Users/fg/Documents/eyevr_git/EyeUnity/Assets/Plugins/Newtonsoft.Json.dll</HintPath>
  </Reference>
  <Reference Include="websocket-sharp">
- <HintPath>/Users/fg/EyeUnity/Assets/Plugins/websocket-sharp.dll</HintPath>
+ <HintPath>/Users/fg/Documents/eyevr_git/EyeUnity/Assets/Plugins/websocket-sharp.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.Graphs">
  <HintPath>/Applications/Unity/Unity.app/Contents/Frameworks/Managed/UnityEditor.Graphs.dll</HintPath>

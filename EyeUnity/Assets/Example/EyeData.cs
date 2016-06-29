@@ -7,8 +7,8 @@ using Newtonsoft.Json;
 
 internal class Glint
 {
-    [JsonProperty("py/tuple")]
-    public List<int> PyTuple { get; set; }
+	[JsonProperty("py/tuple")]
+	public List<float> PyTuple { get; set; }
 	public Vector2 AsVector { 
 		get {
 			if (PyTuple.Count > 1)
@@ -21,8 +21,8 @@ internal class Glint
 
 internal class Xoffs
 {
-    [JsonProperty("py/tuple")]
-    public List<int> PyTuple { get; set; }
+	[JsonProperty("py/tuple")]
+	public List<float> PyTuple { get; set; }
 	public Vector2 AsVector { 
 		get {
 			if (PyTuple.Count > 1)
@@ -35,8 +35,8 @@ internal class Xoffs
 
 internal class Yoffs
 {
-    [JsonProperty("py/tuple")]
-    public List<int> PyTuple { get; set; }
+	[JsonProperty("py/tuple")]
+	public List<float> PyTuple { get; set; }
 	public Vector2 AsVector { 
 		get {
 			if (PyTuple.Count > 1)
@@ -49,8 +49,8 @@ internal class Yoffs
 
 internal class Center
 {
-    [JsonProperty("py/tuple")]
-    public List<float> PyTuple { get; set; }
+	[JsonProperty("py/tuple")]
+	public List<float> PyTuple { get; set; }
 	public Vector2 AsVector { 
 		get {
 			if (PyTuple.Count > 1)
@@ -63,8 +63,8 @@ internal class Center
 
 internal class Size
 {
-    [JsonProperty("py/tuple")]
-    public List<float> PyTuple { get; set; }
+	[JsonProperty("py/tuple")]
+	public List<float> PyTuple { get; set; }
 	public Vector2 AsVector { 
 		get {
 			if (PyTuple.Count > 1)
@@ -78,20 +78,26 @@ internal class Size
 internal class EyeData
 {
 
-    [JsonProperty("glint")]
-    public Glint Glint { get; set; }
+	[JsonProperty("glint")]
+	public Glint Glint { get; set; }
 
-    [JsonProperty("xoffs")]
-    public Xoffs Xoffs { get; set; }
+	[JsonProperty("xoffs")]
+	public Xoffs Xoffs { get; set; }
 
-    [JsonProperty("yoffs")]
-    public Yoffs Yoffs { get; set; }
+	[JsonProperty("yoffs")]
+	public Yoffs Yoffs { get; set; }
 
-    [JsonProperty("center")]
-    public Center Center { get; set; }
+	[JsonProperty("center")]
+	public Center Center { get; set; }
 
-    [JsonProperty("size")]
-    public Size Size { get; set; }
+	[JsonProperty("size")]
+	public Size Size { get; set; }
+
+	[JsonProperty("blink")]
+	public bool Blink { get; set; }
+
+	[JsonProperty("confidence")]
+	public float Confidence { get; set; }
 
 	public Vector2 CombinedOffset {
 		get {
