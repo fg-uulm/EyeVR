@@ -105,3 +105,12 @@ internal class EyeData
 		}
 	}
 }
+
+internal class EyePacket
+{
+	[JsonProperty("data")]
+	public EyeData Data { get; set; }
+
+	[JsonProperty("type")]
+	public string Type { get; set; }
+}

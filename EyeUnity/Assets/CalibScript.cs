@@ -113,7 +113,7 @@ public class CalibScript : MonoBehaviour {
 				//Collect samples
 				if (calibDataCenter.Count == 0 || tracker.lastVector != calibDataCenter [calibDataCenter.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataCenter.Add (tracker.lastVector);
-					Debug.Log ("Center: Added " + tracker.lastVector + " , now having " + calibDataCenter.Count + " samples");
+					//Debug.Log ("Center: Added " + tracker.lastVector + " , now having " + calibDataCenter.Count + " samples");
 				}
 			} else if (IsCalibrating && calibDataTL.Count < SamplesPerPoint) {
 				statText.text = "Live - TL"+calibDataTL.Count;
@@ -124,7 +124,7 @@ public class CalibScript : MonoBehaviour {
 				//Collect samples
 				if (calibDataTL.Count == 0 || tracker.lastVector != calibDataTL [calibDataTL.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataTL.Add (tracker.lastVector);
-					Debug.Log ("TL: Added " + tracker.lastVector + " , now having " + calibDataTL.Count + " samples");
+					//Debug.Log ("TL: Added " + tracker.lastVector + " , now having " + calibDataTL.Count + " samples");
 				}
 			} else if (IsCalibrating && calibDataTR.Count < SamplesPerPoint) {
 				statText.text = "Live - TR"+calibDataTR.Count;
@@ -135,7 +135,7 @@ public class CalibScript : MonoBehaviour {
 				//Collect samples
 				if (calibDataTR.Count == 0 || tracker.lastVector != calibDataTR [calibDataTR.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataTR.Add (tracker.lastVector);
-					Debug.Log ("TR: Added " + tracker.lastVector + " , now having " + calibDataTR.Count + " samples");
+					//Debug.Log ("TR: Added " + tracker.lastVector + " , now having " + calibDataTR.Count + " samples");
 				}
 			} else if (IsCalibrating && calibDataBL.Count < SamplesPerPoint) {
 				statText.text = "Live - BL"+calibDataBL.Count;
@@ -146,7 +146,7 @@ public class CalibScript : MonoBehaviour {
 				//Collect samples
 				if (calibDataBL.Count == 0 || tracker.lastVector != calibDataBL [calibDataBL.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataBL.Add (tracker.lastVector);
-					Debug.Log ("BL: Added " + tracker.lastVector + " , now having " + calibDataBL.Count + " samples"); 
+					//Debug.Log ("BL: Added " + tracker.lastVector + " , now having " + calibDataBL.Count + " samples"); 
 				}
 			} else if (IsCalibrating && calibDataBR.Count < SamplesPerPoint) {
 				statText.text = "Live - BR"+calibDataBR.Count;
@@ -158,7 +158,7 @@ public class CalibScript : MonoBehaviour {
 				//Collect samples
 				if (calibDataBR.Count == 0 || tracker.lastVector != calibDataBR [calibDataBR.Count - 1] && tracker.validNoBlink && tracker.currentConfidence >= 0) {
 					calibDataBR.Add (tracker.lastVector);
-					Debug.Log ("BR: Added " + tracker.lastVector + " , now having " + calibDataBR.Count + " samples");
+					//Debug.Log ("BR: Added " + tracker.lastVector + " , now having " + calibDataBR.Count + " samples");
 				}
 			} else if (IsCalibrating) {
 				statText.text = "Live - DONE";

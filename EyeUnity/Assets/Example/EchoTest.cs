@@ -15,7 +15,7 @@ public class EchoTest : MonoBehaviour {
 	List<Vector2> capture;
 	// Use this for initialization
 	IEnumerator Start () {
-		WebSocket w = new WebSocket(new Uri("ws://134.60.70.23:8080/websocket"));
+		WebSocket w = new WebSocket(new Uri("ws://172.24.1.1:8888/websocket"));
 		//WebSocket w = new WebSocket(new Uri("ws://192.168.178.64:8080/websocket"));
 		yield return StartCoroutine(w.Connect());
 		//w.SendString("Hi there");
@@ -46,11 +46,12 @@ public class EchoTest : MonoBehaviour {
 					
 				yield return 0;
 			} else {
+				w.SendString ("track");
 				string reply = w.RecvString ();
 				if (reply != null) {
 					//Debug.Log ("Received: "+reply);
-					EyeData ret = JsonConvert.DeserializeObject<EyeData> (reply);
-					if (ret.Size == null) {
+					EyePacket ret = JsonConvert.DeserializeObject<EyePacket> (reply);
+					if (ret.Data.Size == null || ret.Type != "track") {
 						Debug.Log ("No pupil / Blink");
 						validNoBlink = false;
 						pS.GetComponent<Renderer> ().material.color = Color.red;
@@ -58,15 +59,15 @@ public class EchoTest : MonoBehaviour {
 					} else {
 						//Debug.Log(ret);
 						//Debug.Log(ret.Glint.AsVector);
-						float size = (float)fs.Filter (ret.Size.AsVector.y / 60, 30.0);
-						currentConfidence = ret.Confidence;
+						float size = (float)fs.Filter (ret.Data.Size.AsVector.y / 60, 30.0);
+						currentConfidence = ret.Data.Confidence;
 						//Debug.Log (size);
 						pS.GetComponent<Renderer> ().material.color = Color.black;
 
-						lastVector = ret.CombinedOffset - ret.Center.AsVector;
-						Debug.Log (lastVector);
+						lastVector = ret.Data.CombinedOffset - ret.Data.Center.AsVector;
+						//Debug.Log (lastVector);
 
-						if (ret.Blink)
+						if (ret.Data.Blink)
 							validNoBlink = false;
 						else
 							validNoBlink = true;
@@ -96,7 +97,7 @@ public class EchoTest : MonoBehaviour {
 					}
 				}
 				if (w.error != null) {
-					Debug.LogError ("Error: " + w.error);
+					Debug.Log ("Error: " + w.error);
 					InvokeRepeating ("Reconnect", 5, 10.0F);
 					break;
 				} else {

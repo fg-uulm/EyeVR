@@ -49,7 +49,7 @@
      <Compile Include="Assets\Calibration.cs" />
      <Compile Include="Assets\CalibrationData.cs" />
      <Compile Include="Assets\Example\EchoTest.cs" />
-     <Compile Include="Assets\Example\EyeData.cs" />
+     <Compile Include="Assets\Example\EyePacket.cs" />
      <Compile Include="Assets\OVR\Moonlight\Scripts\OVRDebugHeadController.cs" />
      <Compile Include="Assets\OVR\Moonlight\Scripts\OVROverlay.cs" />
      <Compile Include="Assets\OVR\Moonlight\Scripts\OVRPlatformMenu.cs" />
