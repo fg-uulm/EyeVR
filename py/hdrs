@@ -1,8 +1,0 @@
-HTTP/1.1 200 OK
-Date: Wed, 01 Jun 2016 08:28:53 GMT
-Server: Apache/2.4.12 (Linux/SUSE)
-Set-Cookie: CaPo=309f23ccf41daecd4b137aabca79836c; path=/; secure; HttpOnly
-Vary: Accept-Encoding
-Transfer-Encoding: chunked
-Content-Type: text/html; charset=UTF-8
-
