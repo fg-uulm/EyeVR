@@ -2,30 +2,24 @@
 TODOs
 
 ## Recognition
-- Blink (Brightness / BrightEdges based) (semi-done)
-- Contour Rating (done)
 - Search Space Minimization based on last position
 - Autogain
 - Glint Persistence
 
-## Structuring
-- Settings
-- Separate Recognition / Debug Imaging
-
-## I/O
-- Delivering p for selected contour (done)
 
 """
 
 # import the necessary packages
 from __future__ import print_function
 from imutils.video import FPS
-from tracker.OneEuroFilter import OneEuroFilter
 import time
 import cv2
 import numpy as np
+from tracker.OneEuroFilter import OneEuroFilter
 from tracker.RatedContour import RatedContour
+from tracker.PulseDetector import findFaceGetPulse
 import settings as s
+
 
 ### VARS
 width = 320
@@ -83,7 +77,7 @@ class Tracker:
         config = {
             'freq': 40,  # Hz
             'mincutoff': 2.05,  # FIXME
-            'beta': 0.2,  # FIXME
+            'beta': 0.1,  # FIXME
             'dcutoff': 1.0  # this one should be ok
         }
 
@@ -93,6 +87,12 @@ class Tracker:
         pupilFilterY = OneEuroFilter(**config)
         pupilFilterH = OneEuroFilter(**config)
         pupilFilterW = OneEuroFilter(**config)
+        bpmFilter = OneEuroFilter(**config)
+
+        # experimental: heartrate / pulse detector (see https://github.com/thearn/webcam-pulse-detector)
+        self.processor = findFaceGetPulse(bpm_limits=[50, 160],
+                                          data_spike_limit=2500.,
+                                          face_detector_smoothness=10.)
 
         while True:
             # do teh heavy lifting here
@@ -107,8 +107,15 @@ class Tracker:
             if (s.SETTINGS['flip']):
                 frame = cv2.flip(frame, -1)
 
+            # Experimental: pulse detection
+            if(s.SETTINGS['heartRateEnabled']):
+                # set current image frame to the processor's input
+                self.processor.frame_in = frame
+                # process the image frame to perform all needed analysis
+                self.processor.run()
+
             # convert to grayscale
-            s.OUT_IMGRAW = frame.copy()
+            #s.OUT_IMGRAW = frame.copy()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             # undistort
@@ -261,13 +268,6 @@ class Tracker:
                     '''
                     ratedCnts.append(RatedContour(c, ws, hs, eyearea_src))
 
-                # sort again
-                '''
-                cnts2 = sorted(cnts2, key = cv2.contourArea, reverse = True) #largest first
-                cnts2 = sorted(cnts2, key = xForContour) #leftmost first (for right eye)
-                cnts2 = sorted(cnts2, key = solidityRatio) #matching areas first (tracking quality indicator)
-                '''
-
                 ratedCnts = sorted(ratedCnts, key=lambda x: x.rating, reverse=True)
 
                 # easy approach
@@ -289,6 +289,7 @@ class Tracker:
                     outdata["yoffs"] = (s.SETTINGS['yOffTop'], s.SETTINGS['yOffBot'])
                     outdata["blink"] = blink
                     outdata["confidence"] = 0.0
+                    outdata["heartbpm"] = 0.0
 
                 elif (ellipse != None):
                     # filter
@@ -311,6 +312,7 @@ class Tracker:
                     outdata["yoffs"] = (yOffTop, yOffBot)
                     outdata["blink"] = blink
                     outdata["confidence"] = float(ratedCnts[0].rating)
+                    outdata["heartbpm"] = bpmFilter(self.processor.bpm.item(), int(round(time.time() * 1000)))
 
                 s.OUT_TRACKDATA = outdata
             except Exception as e:
@@ -340,6 +342,7 @@ class Tracker:
                 eyearea_copy = cv2.addWeighted(eyearea_copy, 0.7, dst, 0.3, 0)
 
                 s.OUT_IMGPROC = eyearea_copy.copy()
+                s.OUT_IMGRAW = self.processor.frame_out.copy()
             except:
                 if(s.SETTINGS['debug']):
                     print("procimg fail")

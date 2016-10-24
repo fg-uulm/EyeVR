@@ -51,19 +51,23 @@ class FrameProvider:
 
 
     def fileList(self):
-        files = glob.glob('*.h264')
+        files = glob.glob('*.avi')
         return files
 
 
     def loopToFile(self):
+        ts = str(int(time.time()))
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        out = cv2.VideoWriter('rec.avi', fourcc, 40.0, (400, 300))
+        out = cv2.VideoWriter('rec_'+ts+'.avi', fourcc, 40.0, (400, 300))
 
         for f in self.framebuffer:
             out.write(f)
 
         out.release()
         settings.logAppend("Wrote "+str(len(self.framebuffer))+" frames to file")
+        settings.logAppend("Available files list:")
+        settings.logAppend(str(self.fileList()))
+        settings.SETTINGS['currentFile'] = "rec_"+ts+".avi"
 
 
     def loadFile(self, filename):

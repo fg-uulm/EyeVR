@@ -81,8 +81,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         elif message == "writeloop":
             try:
                 s.FRMPROV.loopToFile()
-            except:
-                print("File writing error!")
+                response = {"type": "settings", "data": s.SETTINGS}
+                self.write_message(jsonpickle.encode(response))
+            except Exception as e:
+                print("File writing error: "+str(e))
 
         else:
             print("Unsupported function: " + str(message))

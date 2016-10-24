@@ -30,7 +30,7 @@ SETTINGS['autothreshold'] = True
 SETTINGS['resize'] = True
 SETTINGS['flip'] = True
 SETTINGS['mode'] = "live"
-SETTINGS['looplength'] = 100
+SETTINGS['looplength'] = 400
 SETTINGS['brightness'] = 0.98
 SETTINGS['minSpotBrightness'] = 180
 SETTINGS['gammaAdjust'] = 3.85
@@ -38,6 +38,8 @@ SETTINGS['inpaintRadius'] = 2
 SETTINGS['claheClipLimit'] = 1.9
 SETTINGS['grayBlurRadius'] = 5
 SETTINGS['currentFile'] = "rec.avi"
+SETTINGS['heartRateWidth'] = 15
+SETTINGS['heartRateEnabled'] = True
 
 SETTINGS['yOffTop'] = -120
 SETTINGS['yOffBot'] = 70

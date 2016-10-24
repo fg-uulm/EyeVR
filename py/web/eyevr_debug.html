@@ -76,8 +76,8 @@
     </div>
     <div class="row" style="margin-top: 30px;">
         <div class="col-xs-12">
-            <h2>Controls</h2>
-            <div id="settings" style="-webkit-column-count: 3; /* Chrome, Safari, Opera */
+            <h2><a href="#settings" data-toggle="collapse">Settings</a></h2>
+            <div id="settings" class="collapse in" style="-webkit-column-count: 3; /* Chrome, Safari, Opera */
   -moz-column-count: 3; /* Firefox */
   column-count: 3;">
                 <form onsubmit="postSettings(); return false;">
@@ -92,14 +92,16 @@
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <h2>Data Chart</h2>
-            <div id="chartContainer" style="height: 300px; width:100%; background-color:red;"></div>
+            <h2><a href="#chartWrapper" data-toggle="collapse">Realtime Chart</a></h2>
+            <div id="chartWrapper">
+                <div id="chartContainer" class="collapse in" style="height: 300px; width:100%; background-color:red;"></div>
+            </div>
         </div>
     </div>
      <div class="row" style="margin-top: 40px;">
-         <h2>Logs</h2>
-        <div class="col-xs-12" style="height:480px; max-height: 480px; overflow: auto; border:1px solid darkgray">
-            <div id="logscroll" style="height:480px;"></div>
+        <div class="col-xs-12" style="height:480px; ">
+            <h2><a href="#logscroll" data-toggle="collapse">Logs</a></h2>
+            <div id="logscroll" class="collapse" style="height:480px; max-height: 480px; overflow: auto; border:1px solid darkgray;"></div>
         </div>
     </div>
 </div><!-- /.container -->
